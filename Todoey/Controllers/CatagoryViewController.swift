@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class CatagoryViewController: SwipeTableViewController {
     
@@ -20,7 +21,8 @@ class CatagoryViewController: SwipeTableViewController {
 
         loadCatagory()
         
-        tableView.rowHeight = 80
+//        tableView.rowHeight = 80
+//        tableView.separatorStyle = .none
         
     }
 
@@ -37,7 +39,19 @@ class CatagoryViewController: SwipeTableViewController {
         
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
-        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added Yet"
+        if let category = categories?[indexPath.row] {
+        
+            cell.textLabel?.text = category.name
+
+            guard let categoryColour = UIColor(hexString: category.backgroundColor) else {fatalError()}
+            
+            cell.backgroundColor = categoryColour
+
+            cell.textLabel?.textColor = ContrastColorOf(categoryColour, returnFlat: true)
+        }
+        
+
+//        cell.backgroundColor = UIColor.randomFlat.hexValue()
         
         return cell
         
@@ -108,15 +122,19 @@ class CatagoryViewController: SwipeTableViewController {
         
         let alert = UIAlertController(title: "Add New Todoey Category", message: "", preferredStyle: .alert)
         
-        let action = UIAlertAction(title: "Add", style: .default) { (action) in
+        alert.addAction(UIAlertAction(title: "Add", style: .default, handler: { (action) in
             
             let newCategory = Category()
             newCategory.name = textField.text!
+            newCategory.backgroundColor = UIColor.randomFlat.hexValue()
             
             self.save(category: newCategory)
-        }
+        }))
         
-        alert.addAction(action)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: { (action: UIAlertAction!) in
+            
+            alert .dismiss(animated: true, completion: nil)
+        }))
         
         alert.addTextField { (alertTextField) in
             textField = alertTextField
@@ -124,8 +142,6 @@ class CatagoryViewController: SwipeTableViewController {
         }
 
         present(alert, animated: true, completion: nil)
-        
-        
     }
 
     
